@@ -14,6 +14,13 @@ cp .env.example .env        # add your Binance API keys + risk settings
 ./run.sh                    # → http://localhost:5000
 ```
 
+### 📱 Android APK
+**[`dist/AutoVTrader-v1.0.0.apk`](dist/AutoVTrader-v1.0.0.apk)** — sideload it on your phone
+(same Wi-Fi as your PC), enter `http://<pc-ip>:5000`, and the whole desk runs on mobile:
+scanner, entry/SL/TP plans, $1000 risk rules, day planner. Rebuild anytime with
+`android/build_apk.sh` (zero-Gradle pipeline) or open `android/` in Android Studio —
+see [android/README.md](android/README.md).
+
 ### What's inside
 | Tab | What it does |
 |---|---|

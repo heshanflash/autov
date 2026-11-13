@@ -18,6 +18,10 @@ node_modules/
 package-lock.json
 *.tgz
 
+# Android build intermediates (dist/*.apk is the deliverable and IS tracked)
+android/build/
+android/.tools/
+
 # Logs & OS
 *.log
 .DS_Store
