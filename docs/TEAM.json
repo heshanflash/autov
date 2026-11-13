@@ -1,0 +1,16 @@
+[
+  {"icon": "📋", "role": "Product Manager", "name": "AutoV PM",
+   "contribution": "Translated your brief into scope: full-market coin scan → per-coin chart analysis → entry/SL/TP plans → $1000 account with 1% daily & monthly loss caps → day-by-day planning → reference research. Prioritised paper-mode safety first."},
+  {"icon": "📊", "role": "Quant Analyst", "name": "Quant Desk",
+   "contribution": "Designed the composite scoring engine: EMA 9/21/50/200 trend structure, RSI(14) momentum, MACD histogram, Bollinger position, ADX strength, Stochastic, volume confirmation and candlestick patterns → −100..+100 score with confidence. ATR-based stop-loss and R-multiple TP ladder (TP1/2/3 with partial exits)."},
+  {"icon": "🛡️", "role": "Risk Manager", "name": "Risk Guard",
+   "contribution": "Hard guard rails: max 1% loss per UTC day and per month (auto-halts new entries), 0.5% risk per trade, max 5 concurrent positions, 25% equity cap per coin, remaining-budget checks before every entry. State persists across restarts."},
+  {"icon": "⚙️", "role": "Backend Engineer", "name": "API Team",
+   "contribution": "Binance REST integration (public klines/tickers/exchangeInfo + signed account & order endpoints), automatic live→demo data fallback so the app works even offline, thread-pooled scanner with 60s cache, paper-execution engine, day-by-day planner, event-driven backtester."},
+  {"icon": "🎨", "role": "Frontend Engineer", "name": "UI Team",
+   "contribution": "Dark trading-desk dashboard: regime overview, sortable scanner table, TradingView lightweight-charts with entry/SL/TP price lines, trade-plan card with one-click execution, risk gauges, day planner calendar, portfolio ledger with live uPnL, backtest charts."},
+  {"icon": "🔭", "role": "Research Analyst", "name": "Reference Desk",
+   "contribution": "Benchmarked the app against 3Commas, Pionex, Cryptohopper, Bitsgap and open-source Binance bots — adopted their strongest safety patterns (dry-run default, daily-loss kill switch, TP/SL on every order, no-withdrawal API keys) without their monthly fees."},
+  {"icon": "🧪", "role": "QA / Test", "name": "QA Team",
+   "contribution": "Verified all API routes, risk-gate edge cases (daily/monthly halt, budget overrun, position caps), partial-TP ledger math, SL-before-TP conservative backtest fills, demo-data determinism and responsive layout."}
+]

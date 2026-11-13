@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AutoV Trader — Binance Analysis Desk</title>
+<link rel="stylesheet" href="/static/styles.css">
+<script src="/static/vendor/lightweight-charts.standalone.production.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <span class="logo">▲</span>
+    <div>
+      <h1>AutoV <span class="accent">Trader</span></h1>
+      <div class="sub" id="modeBadge">loading…</div>
+    </div>
+  </div>
+  <div class="top-stats">
+    <div class="tstat"><label>Equity</label><b id="topEquity">—</b></div>
+    <div class="tstat"><label>Day PnL</label><b id="topDayPnl">—</b></div>
+    <div class="tstat"><label>Month PnL</label><b id="topMonthPnl">—</b></div>
+    <div class="tstat"><label>Risk left today</label><b id="topRiskLeft">—</b></div>
+    <div class="tstat"><label>Market</label><b id="topRegime">—</b></div>
+  </div>
+  <div class="top-actions">
+    <span class="chip" id="dataChip" title="Data source">…</span>
+    <button class="btn ghost" id="btnRefresh">⟳ Scan</button>
+    <button class="btn ghost" id="btnSettings">⚙ Settings</button>
+  </div>
+</header>
+
+<div class="banner" id="haltBanner" style="display:none"></div>
+
+<nav class="tabs">
+  <button class="tab active" data-tab="dashboard">Dashboard</button>
+  <button class="tab" data-tab="scanner">Scanner</button>
+  <button class="tab" data-tab="charts">Charts</button>
+  <button class="tab" data-tab="planner">Day Plan</button>
+  <button class="tab" data-tab="portfolio">Portfolio</button>
+  <button class="tab" data-tab="backtest">Backtest</button>
+  <button class="tab" data-tab="team">Team &amp; References</button>
+</nav>
+
+<main>
+<!-- ============ DASHBOARD ============ -->
+<section class="panel active" id="tab-dashboard">
+  <div class="grid cards4">
+    <div class="card"><h3>Market regime</h3>
+      <div class="big" id="regimeValue">—</div>
+      <p class="muted" id="regimeAdvice">—</p>
+      <div class="kv"><span>Breadth up</span><b id="breadth">—</b></div>
+      <div class="kv"><span>Avg 24h change</span><b id="avgChg">—</b></div>
+      <div class="kv"><span>BTC trend / RSI</span><b id="btcTrend">—</b></div>
+    </div>
+    <div class="card"><h3>Risk guard ($1000 rules)</h3>
+      <div class="gauge"><div class="gauge-fill" id="dayGauge"></div></div>
+      <div class="kv"><span>Daily loss budget</span><b id="dayBudget">—</b></div>
+      <div class="kv"><span>Daily used</span><b id="dayUsed">—</b></div>
+      <div class="gauge"><div class="gauge-fill month" id="monthGauge"></div></div>
+      <div class="kv"><span>Monthly budget (1%)</span><b id="monthBudget">—</b></div>
+      <div class="kv"><span>Monthly used</span><b id="monthUsed">—</b></div>
+    </div>
+    <div class="card"><h3>Equity curve</h3>
+      <canvas id="equityCanvas" width="340" height="150"></canvas>
+      <div class="kv"><span>Since start</span><b id="equityReturn">—</b></div>
+    </div>
+    <div class="card"><h3>Scan summary</h3>
+      <div class="kv"><span>Coins analyzed</span><b id="scanCount">—</b></div>
+      <div class="kv"><span>Strong BUY signals</span><b id="buyCount" class="up">—</b></div>
+      <div class="kv"><span>Weak BUY</span><b id="weakBuyCount">—</b></div>
+      <div class="kv"><span>SELL / avoid</span><b id="sellCount" class="down">—</b></div>
+      <div class="kv"><span>Open positions</span><b id="openCount">—</b></div>
+    </div>
+  </div>
+
+  <div class="grid two">
+    <div class="card">
+      <h3>Top signals now <button class="btn tiny" data-goto="scanner">open scanner →</button></h3>
+      <table class="table" id="topSignals">
+        <thead><tr><th>Coin</th><th>Price</th><th>24h</th><th>Score</th><th>Signal</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="card">
+      <h3>Today's plan <button class="btn tiny" data-goto="planner">full planner →</button></h3>
+      <div class="kv"><span>Date (UTC)</span><b id="planDate">—</b></div>
+      <div class="kv"><span>Loss budget today</span><b id="planBudget">—</b></div>
+      <div class="kv"><span>Remaining</span><b id="planRemaining">—</b></div>
+      <div class="kv"><span>Risk per trade</span><b id="planRisk">—</b></div>
+      <div class="kv"><span>Trades left (by risk)</span><b id="planTradesLeft">—</b></div>
+      <p class="muted" id="planNote">Plan loads with the scanner.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SCANNER ============ -->
+<section class="panel" id="tab-scanner">
+  <div class="card">
+    <div class="row">
+      <h3>Full-market scanner <span class="muted" id="scanMeta"></span></h3>
+      <div class="row gap">
+        <select id="tfSelect">
+          <option value="5m">5m</option><option value="15m">15m</option>
+          <option value="1h" selected>1h</option><option value="4h">4h</option>
+          <option value="1d">1d</option>
+        </select>
+        <button class="btn" id="btnForceScan">⟳ Force re-scan</button>
+      </div>
+    </div>
+    <table class="table sortable" id="scanTable">
+      <thead><tr>
+        <th data-k="symbol">Symbol</th>
+        <th data-k="price">Price</th>
+        <th data-k="change24h">24h %</th>
+        <th data-k="score">Score</th>
+        <th data-k="signal">Signal</th>
+        <th data-k="confidence">Conf.</th>
+        <th data-k="atrPct">ATR%</th>
+        <th>Entry</th><th>Stop-Loss</th><th>TP1 / R:R</th>
+        <th></th>
+      </tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============ CHARTS ============ -->
+<section class="panel" id="tab-charts">
+  <div class="grid chart-layout">
+    <div class="card wide">
+      <div class="row">
+        <h3><span id="chartSymbol">BTCUSDT</span> <span class="muted" id="chartTf"></span></h3>
+        <div class="row gap">
+          <input id="symbolInput" value="BTCUSDT" spellcheck="false">
+          <select id="chartTfSelect">
+            <option value="15m">15m</option><option value="1h" selected>1h</option>
+            <option value="4h">4h</option><option value="1d">1d</option>
+          </select>
+          <button class="btn" id="btnLoadChart">Load</button>
+        </div>
+      </div>
+      <div id="candleChart"></div>
+      <div class="legend" id="chartLegend"></div>
+      <div class="row gap" style="margin-top:8px;flex-wrap:wrap" id="quickSymbols"></div>
+    </div>
+    <div class="card">
+      <h3>Trade plan</h3>
+      <div id="planBox" class="plan-box">Load a symbol to see its plan.</div>
+    </div>
+    <div class="card">
+      <h3>Analysis checks <span id="signalBadge" class="badge"></span></h3>
+      <div class="score-line"><div class="score-fill" id="scoreFill"></div></div>
+      <table class="table tight" id="checksTable">
+        <tbody></tbody>
+      </table>
+      <div class="kv"><span>RSI / ADX / ATR%</span><b id="indLine1">—</b></div>
+      <div class="kv"><span>Patterns</span><b id="patternLine">—</b></div>
+      <div class="kv"><span>Support / Resistance</span><b id="srLine">—</b></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PLANNER ============ -->
+<section class="panel" id="tab-planner">
+  <div class="grid cards3">
+    <div class="card highlight">
+      <h3>Today</h3>
+      <div class="big" id="plTodayDate">—</div>
+      <div class="kv"><span>PnL today</span><b id="plTodayPnl">—</b></div>
+      <div class="kv"><span>Budget (1% of equity)</span><b id="plTodayBudget">—</b></div>
+      <div class="kv"><span>Remaining</span><b id="plTodayRemaining">—</b></div>
+      <div class="kv"><span>Suggested risk / trade</span><b id="plRisk">—</b></div>
+      <div class="kv"><span>Trades still allowed</span><b id="plTradesLeft">—</b></div>
+    </div>
+    <div class="card">
+      <h3>This month <span id="plMonthLabel"></span></h3>
+      <div class="gauge"><div class="gauge-fill month" id="plMonthGauge"></div></div>
+      <div class="kv"><span>Month PnL</span><b id="plMonthPnl">—</b></div>
+      <div class="kv"><span>Monthly loss budget</span><b id="plMonthBudget">—</b></div>
+      <div class="kv"><span>Remaining</span><b id="plMonthRemaining">—</b></div>
+      <div class="kv"><span>Open risk in market</span><b id="plOpenRisk">—</b></div>
+    </div>
+    <div class="card">
+      <h3>Rules</h3>
+      <ul class="rules" id="ruleList">
+        <li>Capital: <b>$1000</b> starting account</li>
+        <li>Max loss per day: <b>1%</b> → trading halts</li>
+        <li>Max loss per month: <b>1%</b> → trading halts</li>
+        <li>Risk per trade: <b>0.5%</b> of equity</li>
+        <li>Every entry must have <b>SL + 3 TP levels</b></li>
+        <li>Max <b>5</b> positions, <b>25%</b> equity per coin</li>
+      </ul>
+      <button class="btn ghost" id="btnResetAccount">↺ Reset paper account</button>
+    </div>
+  </div>
+  <div class="card">
+    <h3>Day-by-day history (last 30 days)</h3>
+    <table class="table" id="plannerTable">
+      <thead><tr><th>Date</th><th>Budget</th><th>PnL</th><th>Trades</th><th>Status</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============ PORTFOLIO ============ -->
+<section class="panel" id="tab-portfolio">
+  <div class="grid cards4">
+    <div class="card"><h3>Equity</h3><div class="big" id="pfEquity">—</div>
+      <div class="kv"><span>Cash</span><b id="pfCash">—</b></div>
+      <div class="kv"><span>Start</span><b id="pfStart">—</b></div></div>
+    <div class="card"><h3>Unrealized</h3><div class="big" id="pfUnreal">—</div>
+      <div class="kv"><span>Open risk</span><b id="pfOpenRisk">—</b></div>
+      <div class="kv"><span>Open positions</span><b id="pfOpen">—</b></div></div>
+    <div class="card"><h3>Trade stats</h3>
+      <div class="kv"><span>Win rate</span><b id="pfWinRate">—</b></div>
+      <div class="kv"><span>Profit factor</span><b id="pfPF">—</b></div>
+      <div class="kv"><span>Total trades</span><b id="pfTrades">—</b></div></div>
+    <div class="card"><h3>Net PnL</h3><div class="big" id="pfNet">—</div>
+      <div class="kv"><span>Return</span><b id="pfReturn">—</b></div>
+      <div class="kv"><span>Mode</span><b id="pfMode">—</b></div></div>
+  </div>
+  <div class="card">
+    <h3>Open positions</h3>
+    <table class="table" id="posTable">
+      <thead><tr><th>Coin</th><th>Qty</th><th>Entry</th><th>Mark</th><th>uPnL</th>
+        <th>Stop</th><th>Targets</th><th>Risk $</th><th></th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+  <div class="card">
+    <h3>Trade history</h3>
+    <table class="table" id="tradeTable">
+      <thead><tr><th>Closed</th><th>Coin</th><th>Entry</th><th>Exit</th><th>PnL</th><th>%</th><th>Reason</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============ BACKTEST ============ -->
+<section class="panel" id="tab-backtest">
+  <div class="card">
+    <div class="row">
+      <h3>Backtest the same strategy on history</h3>
+      <div class="row gap">
+        <input id="btSymbol" value="BTCUSDT" spellcheck="false">
+        <select id="btTf"><option value="1h" selected>1h</option>
+          <option value="4h">4h</option><option value="1d">1d</option></select>
+        <select id="btLimit"><option value="400">400 candles</option>
+          <option value="700" selected>700 candles</option>
+          <option value="1000">1000 candles</option></select>
+        <button class="btn" id="btnBacktest">▶ Run backtest</button>
+      </div>
+    </div>
+    <div id="btResults" class="grid cards4" style="display:none">
+      <div class="card mini"><label>Net PnL</label><div class="big" id="btNet">—</div>
+        <span id="btReturn" class="muted"></span></div>
+      <div class="card mini"><label>Win rate</label><div class="big" id="btWin">—</div>
+        <span id="btTradesN" class="muted"></span></div>
+      <div class="card mini"><label>Profit factor</label><div class="big" id="btPF">—</div>
+        <span class="muted">gross win / gross loss</span></div>
+      <div class="card mini"><label>Max drawdown</label><div class="big" id="btDD">—</div>
+        <span class="muted">peak-to-trough</span></div>
+    </div>
+    <canvas id="btCanvas" width="900" height="200" style="display:none;width:100%"></canvas>
+    <table class="table" id="btTrades"><tbody></tbody></table>
+    <p class="muted" id="btNote"></p>
+  </div>
+</section>
+
+<!-- ============ TEAM ============ -->
+<section class="panel" id="tab-team">
+  <div class="grid two">
+    <div class="card">
+      <h3>👩‍💻 The team behind this build</h3>
+      <div id="teamList"></div>
+    </div>
+    <div class="card">
+      <h3>🔭 Reference apps — analyzed &amp; what we borrowed</h3>
+      <div id="refList"></div>
+    </div>
+  </div>
+</section>
+</main>
+
+<!-- ============ SETTINGS MODAL ============ -->
+<div class="modal" id="settingsModal">
+  <div class="modal-box">
+    <div class="row">
+      <h3>Settings &amp; safety</h3>
+      <button class="btn ghost" id="btnCloseSettings">✕</button>
+    </div>
+    <div class="form-grid">
+      <label>Trading mode
+        <select id="setMode"><option value="paper">paper (safe, simulated)</option>
+        <option value="live">live (real Binance orders)</option></select></label>
+      <label>Data mode
+        <select id="setDataMode"><option value="auto">auto (live, fallback demo)</option>
+        <option value="live">live only</option><option value="demo">demo only</option></select></label>
+      <label>Account size $ <input id="setAccount" type="number" min="10" step="10"></label>
+      <label>Risk per trade % <input id="setRisk" type="number" min="0.05" step="0.05"></label>
+      <label>Max daily loss % <input id="setDaily" type="number" min="0.1" step="0.1"></label>
+      <label>Max monthly loss % <input id="setMonthly" type="number" min="0.1" step="0.1"></label>
+      <label>Max open positions <input id="setMaxPos" type="number" min="1" max="20"></label>
+      <label>Max % per coin <input id="setMaxSym" type="number" min="5" max="100"></label>
+      <label>Stop-loss ATR multiplier <input id="setAtr" type="number" min="0.5" step="0.1"></label>
+      <label>Scanner size <input id="setScan" type="number" min="5" max="200"></label>
+    </div>
+    <div class="notice">
+      🔐 <b>API keys:</b> <span id="keyStatus">…</span><br>
+      Use Binance API keys with <b>Enable Reading + Spot trading only</b> —
+      <b>disable withdrawals</b> and set an IP allow-list. Never share this file's <code>.env</code>.
+    </div>
+    <div class="row gap" style="justify-content:flex-end">
+      <button class="btn ghost" id="btnCancelSettings">Cancel</button>
+      <button class="btn" id="btnSaveSettings">Save settings</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+[
+  {"icon": "🤝", "name": "3Commas", "url": "https://www.turbinefi.com/blog/best-crypto-trading-bots",
+   "summary": "Mature multi-exchange bot platform (founded 2017) with DCA, grid and TradingView-webhook signal bots, SmartTrade terminal for complex SL/TP, and a $10,000 virtual demo account. Subscription $20–140/month. Its signal bots and SmartTrade risk controls are the closest commercial parallel to this app.",
+   "borrowed": ["signal → auto plan flow", "TP/SL on every order", "paper demo before live", "TradingView-style confidence score"]},
+  {"icon": "🪙", "name": "Pionex", "url": "https://cryptotradingbots.info/best-crypto-trading-bots-2026-6",
+   "summary": "Exchange with 16+ built-in bots (grid, DCA, reverse grid, arbitrage) — zero API-key sharing because funds stay on the venue; 0.05% spot fee, no bot subscription. Shows how strong 'no external key exposure' is as a safety story.",
+   "borrowed": ["built-in safety over third-party keys", "free core bots (we charge $0)", "grid/dca ideas on roadmap"]},
+  {"icon": "🤖", "name": "Cryptohopper", "url": "https://cryptoadventure.com/8-best-automated-crypto-trading-platforms-in-2026/",
+   "summary": "Indicator strategy designer + signal marketplace with paper trading (one paper bot per tier) and a panic button that closes positions. Pricing $29–129/month. Marketplace signals are its moat; rent-a-strategy performance risk is its weakness.",
+   "borrowed": ["indicator-driven strategy builder", "paper trading gate before live", "one-click panic close (our close button)"]},
+  {"icon": "📊", "name": "Bitsgap", "url": "https://www.gt-protocol.io/learn/best-ai-crypto-trading-bots-2026/",
+   "summary": "Grid/DCA/futures bots across 17 exchanges with $100,000 demo accounts, backtesting per plan tier, and an AI assistant that proposes grid configurations. API keys must be trading-only — withdrawals enabled keys are rejected.",
+   "borrowed": ["backtest module", "large demo/virtual capital", "trade-only API key enforcement (documented in Settings)"]},
+  {"icon": "🌊", "name": "Open-source Binance bots (volatility bot & TradingView webhook bots)", "url": "https://github.com/78934720/tradingview-bot",
+   "summary": "Popular GitHub bots add the operational patterns: risk checks in order (allowlist → size cap → per-symbol cap → total exposure → daily loss halt → cooldown), dry-run mode, idempotent orders, and 'exit immediately on SL, never wait for confirmation'. The Binance volatility bot scans every USDT pair for momentum spikes.",
+   "borrowed": ["ordered risk-check chain", "dry-run default", "SL exits bypass all gating", "whole-universe USDT scan"]},
+  {"icon": "🧠", "name": "AI multi-agent trading bots", "url": "https://pkg.go.dev/github.com/wferreirauy/binance-bot",
+   "summary": "Newer bots layer LLM 'AI committees' that must approve entries at a confidence threshold, while stop-loss/trailing exits stay 100% mechanical. Also fee-aware take-profits that ignore signals which don't cover round-trip fees.",
+   "borrowed": ["confidence thresholds on entries", "mechanical exits are never blocked", "fee-adjusted TP (0.1% taker in our math)"]}
+]
